@@ -1,0 +1,93 @@
+/* Overall app container */
+.app-container {
+    min-height: 100vh;
+    max-width: 100vw;
+    background: linear-gradient(to right, #f8f9fa, #e0eafc);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Navbar styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    /* background-color: #4b6cb7; */
+    background-image: linear-gradient(to right, #182848, #4b6cb7);
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Navbar brand/logo */
+.navbar-brand {
+    font-size: 1.8rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: azure;
+}
+
+/* Buttons container */
+.navbar-buttons {
+    display: flex;
+    gap: 20px;
+}
+
+/* Individual button */
+.nav-button {
+    background: transparent;
+    border: 2px solid white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 25px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Hover effect */
+.nav-button:hover {
+    background: white;
+    color: #4b6cb7;
+}
+
+/* Active button */
+.nav-button.active {
+    background: white;
+    color: #4b6cb7;
+    font-weight: bold;
+    border-color: white;
+}
+
+/* Content styling */
+.content {
+    margin: 30px;
+    /* padding: 20px;  */
+    /* this will be applied to the white area outside the dropbox */
+    /* background: white; */
+    border-radius: 15px;
+    /* box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); */
+
+    display: flex !important;
+    justify-content: center !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
+
+
+@media (max-width: 600px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar-buttons {
+        width: 100%;
+        justify-content: space-around;
+        margin-top: 10px;
+    }
+
+    .content {
+        margin: 15px;
+        padding: 15px;
+    }
+}

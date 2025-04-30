@@ -1,0 +1,64 @@
+/* ReceiveFiles.css */
+
+.container {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.input-box {
+    width: 250px;
+    padding: 10px;
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    margin: 20px;
+    font-size: 16px;
+}
+
+.sendbutton {
+    padding: 10px 25px;
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+    width: 150px !important;
+}
+
+.sendbutton:hover {
+    background-color: #138496;
+}
+
+p {
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+.for-center{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+@media (max-width: 400px) {
+    .container h3 {
+        font-size: 1.3rem;
+    }
+
+    
+
+}
+
+
+@media (max-width: 400px) {
+    .input-box{
+        width: 160px;
+    }
+    .sendbutton {
+        /* font-size: 0.95rem;
+        padding: 10px; */
+        width: 100px !important;
+    }
+}

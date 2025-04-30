@@ -1,0 +1,179 @@
+/* DragDropandSend.css */
+
+.container {
+    text-align: center !important;
+    min-height: 70vh !important;  /* Default height but grows with content */
+    display: flex !important;
+    justify-content: center !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    max-width: 100vw !important;
+    width: 70%;
+    margin: 0 !important;
+    padding: 0 !important;
+
+
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+    
+}
+
+
+.drop-zone {
+    border: 2px dashed #5c2bff !important;
+    border-radius: 10px !important;
+    padding: 40px !important;
+    background-color: #f0f8ff !important;
+    transition: background-color 0.3s !important;
+    cursor: pointer !important;
+    width: 30% !important;
+}
+
+.drop-zone.dragging {
+    background-color: #3c06c5 !important;
+}
+
+.choose-option {
+    color: #007bff !important;
+    text-decoration: underline !important;
+    cursor: pointer !important;
+}
+
+.file-container {
+    margin-top: 20px !important;
+    text-align: left !important;
+    width: 50% !important;
+    padding: 10px !important;
+    border: 5px solid #ccc !important;
+    border-radius: 5px !important;
+}
+
+.file-item {
+    margin-bottom: 10px !important;
+}
+
+.file-info {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.delete-button {
+    margin-left: 10px !important;
+    color: red !important;
+    cursor: pointer !important;
+    border: none !important;
+    background: none !important;
+}
+
+.sendbutton {
+    margin-top: 20px !important;
+    padding: 10px 20px !important;
+    background-color: #28a745 !important;
+    color: white !important;
+    border: none !important;
+    font-size: 16px !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    transition: background 0.3s !important;
+}
+
+.sendbutton:hover {
+    background-color: #218838 !important;
+}
+
+.code {
+    margin-top: 20px !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3 !important;
+    border-top: 4px solid #333 !important;
+    border-radius: 50% !important;
+    width: 20px !important;
+    height: 20px !important;
+    animation: spin 1s linear infinite !important;
+    display: inline-block !important;
+    margin-left: 10px !important;
+    vertical-align: middle !important;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg) !important; }
+    100% { transform: rotate(360deg) !important; }
+}
+.box-drop{
+    font-size: 20px;
+    font-weight:700;
+}
+.upload-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.upload-icon i {
+    margin-bottom: 8px;
+}
+
+/* Already existing styles remain unchanged above this point */
+
+@media screen and (max-width: 768px) {
+    .drop-zone {
+        width: 80% !important;
+        padding: 30px !important;
+    }
+
+    .file-container {
+        width: 90% !important;
+        text-align: center !important;
+    }
+
+    .file-info {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    .sendbutton {
+        width: 60px !important;
+        font-size: 14px !important;
+        padding: 8px !important;
+    }
+
+    .code {
+        font-size: 16px !important;
+    }
+
+    .box-drop {
+        font-size: 18px !important;
+    }
+    .upload-icon i {
+        margin-bottom: 4px;
+        font-size: 40px;
+    }
+    
+}
+
+@media screen and (max-width: 480px) {
+    .drop-zone {
+        width: 95% !important;
+        padding: 20px !important;
+    }
+
+    .sendbutton {
+        width: 100% !important;
+        font-size: 14px !important;
+    }
+
+    .box-drop {
+        font-size: 16px !important;
+    }
+    .upload-icon i {
+        margin-bottom: 2px;
+        font-size: 30px;
+    }
+}

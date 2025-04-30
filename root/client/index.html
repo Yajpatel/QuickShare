@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<link rel="icon" type="image/svg+xml" href="/vite.svg" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Vite + React</title>
+	<!-- bootstrap spinner -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+	<!-- font awesome icon -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<!-- 
+	<style>
+		body {
+			background-color: black;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			/* Prevent scrollbars */
+			/* background: #0b0c0c; */
+			/* Dark blue background */
+		}
+
+		/* Style for each snowflake */
+		.snowflake {
+			position: absolute;
+			top: -10px;
+			/* Start slightly above the screen */
+			animation: fall linear infinite;
+			/* Define the falling animation */
+		}
+
+		/* Falling animation */
+		@keyframes fall {
+			to {
+				transform: translateY(100vh);
+				/* Move snowflakes from top to bottom */
+			}
+		} 
+	</style> -->
+	<style>
+		#snowfall {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			pointer-events: none; /* So it doesn't block clicks */
+			z-index: 9999;
+		}
+
+	</style>
+</head>
+
+<body>
+	<div id="root">
+	</div>
+	<!-- <canvas id="snowfall"></canvas> -->
+	<script>
+		const canvas = document.getElementById('snowfall');
+		const ctx = canvas.getContext('2d');
+	  
+		let width = canvas.width = window.innerWidth;
+		let height = canvas.height = window.innerHeight;
+	  
+		const numFlakes = 100;
+		const flakes = [];
+	  
+		for (let i = 0; i < numFlakes; i++) {
+		  flakes.push({
+			x: Math.random() * width,
+			y: Math.random() * height,
+			r: Math.random() * 3 + 2,
+			d: Math.random() + 1
+		  });
+		}
+	  
+		function drawFlakes() {
+			ctx.clearRect(0, 0, width, height);
+
+			// ctx.fillStyle = 'black';
+			
+		  ctx.fillStyle = 'white';
+
+		  ctx.beginPath();
+		  for (let i = 0; i < numFlakes; i++) {
+			const f = flakes[i];
+			ctx.moveTo(f.x, f.y);
+			ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2, true);
+		  }
+		  ctx.fill();
+		  moveFlakes();
+		}
+	  
+		function moveFlakes() {
+		  for (let i = 0; i < numFlakes; i++) {
+			const f = flakes[i];
+			f.y += Math.pow(f.d, 2) + 1;
+			f.x += Math.sin(f.y * 0.01);
+	  
+			if (f.y > height) {
+			  flakes[i] = { x: Math.random() * width, y: 0, r: f.r, d: f.d };
+			}
+		  }
+		}
+	  
+		setInterval(drawFlakes, 25);
+		window.addEventListener('resize', () => {
+		  width = canvas.width = window.innerWidth;
+		  height = canvas.height = window.innerHeight;
+		});
+	  </script>
+	  
+	<!-- <script>
+		const snowflakeSymbols = ['.'];
+		// const snowflakeSymbols = ['❄', '✦', '✧', '✺', '✶', '❅'];
+		// const snowflakeSymbols = ['❄', '✦', '✧', '✺', '✶', '❅'];
+		// const snowflakeSymbols = ['❄', '✦', '✧', '✺', '✶', '❅'];
+		// const snowflakeSymbols = ['❄', '✦', '✧', '✺', '✶', '❅'];
+		// const snowflakeSymbols = ['❄', '✦', '✧', '✺', '✶', '❅'];
+
+		// Variables to control snowfall speed
+		let snowfallSpeed = 100; // Frequency of snowflake creation (in milliseconds)
+		let fallDurationRange = { min: 5, max: 10 }; // Fall speed (in seconds)
+
+		// Function to create a snowflake element
+		function createSnowflake() {
+			const snowflake = document.createElement('div');
+			snowflake.classList.add('snowflake');
+
+			// Randomly decide which symbol to use for the snowflake
+			const randomSymbol = snowflakeSymbols[Math.floor(Math.random() * snowflakeSymbols.length)];
+			snowflake.innerHTML = randomSymbol;
+			snowflake.style.fontSize = Math.random() * 10 + 50 + 'px'; // Random font size between 10px and 20px
+			snowflake.style.color = 'white'; // Snowflake color
+			snowflake.style.opacity = 0.8; // Slight opacity for a soft effect
+			snowflake.style.top = '-80px';
+			// Set a random horizontal position for the snowflake
+			const position = Math.random() * window.innerWidth + 'px';
+			const fallDuration = Math.random() * (fallDurationRange.max - fallDurationRange.min) + fallDurationRange.min;
+
+			snowflake.style.left = position; // Set snowflake horizontal position
+			snowflake.style.animationDuration = fallDuration + 's'; // Set fall speed
+
+			// Append the snowflake to the body
+			document.body.appendChild(snowflake);
+
+			// Remove the snowflake after it has fallen
+			setTimeout(() => {
+				snowflake.remove();
+			}, fallDuration * 1000); // Remove after the fall duration (converted to ms)
+		}
+
+		// Start the snowfall effect by creating snowflakes at intervals
+		function startSnowfall() {
+			setInterval(createSnowflake, snowfallSpeed);
+		}
+
+		// Start the snowfall effect when the page loads
+		startSnowfall();
+	</script> -->
+	<script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>
