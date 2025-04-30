@@ -59,7 +59,9 @@ function ReceiveFiles() {
     
     return (
         <div className="container">
-            <h3 style={{ color: "black" }}>📥 Receive Files</h3>
+            <h3 style={{ color: "black" }} className="label">
+                <i className="fa-regular fa-circle-down bouncing-icon"></i> Receive File
+            </h3>
             <form onSubmit={handleSubmit}>
                 <div className="for-center">
                     <div>

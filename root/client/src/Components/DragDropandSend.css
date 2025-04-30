@@ -101,6 +101,22 @@
     vertical-align: middle !important;
 }
 
+
+/* /////////// */
+@keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px); /* You can adjust the value to control the bounce height */
+    }
+  }
+  
+  .upload-icon i {
+    animation: bounce 1s infinite;
+  }
+/* //////////////   */
+
 @keyframes spin {
     0% { transform: rotate(0deg) !important; }
     100% { transform: rotate(360deg) !important; }
@@ -176,4 +192,9 @@
         margin-bottom: 2px;
         font-size: 30px;
     }
+}
+
+.box-drop{
+    font-weight: 800;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }

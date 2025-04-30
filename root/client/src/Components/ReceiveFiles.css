@@ -41,6 +41,21 @@ p {
     justify-content: center;
     align-items: center;
 }
+/* .////////////////////////////// */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px); /* Adjust bounce height */
+    }
+}
+
+.bouncing-icon {
+    animation: bounce 1s infinite;
+}
+
+/* //////////////////////////////// */
 
 @media (max-width: 400px) {
     .container h3 {
@@ -61,4 +76,9 @@ p {
         padding: 10px; */
         width: 100px !important;
     }
+}
+
+.label{
+    font-weight: 700;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }

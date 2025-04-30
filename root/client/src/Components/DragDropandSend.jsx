@@ -108,7 +108,7 @@ function DragDropandSend() {
                 className={`drop-zone ${dragging ? 'dragging' : ''}`}
             >
                 <div className="upload-icon">
-                    <i className="fa fa-cloud-upload fa-3x" style={{ color: "#007bff" }}></i>
+                    <i className="fa fa-cloud-upload fa-3x animate_animated animate_bounce" style={{ color: "#007bff" }}></i>
                     <h3 style={{ color: "black" }} className="box-drop">Drop your file here</h3>
                 </div>
                 <p><span onClick={handleClick} className="choose-option">click to choose file</span></p>
