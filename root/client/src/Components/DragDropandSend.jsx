@@ -149,7 +149,7 @@ function DragDropandSend() {
                 </form>
             </div>
 
-            {randomCode && <div className="code" style={{ color: 'black' }}>{randomCode}</div>}
+            {randomCode && <div className="code" style={{ color: 'black' }}>Enter This Code To Recieve : "{randomCode}" </div>}
         </div>
     );
 }
