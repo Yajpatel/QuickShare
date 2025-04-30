@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import DragDropandSend from './DragDropandSend';
 import ReceiveFiles from './ReceiveFiles';
 import './FileTransfer.css'; // Updated to a new CSS file name
-
+import Footer from './Footer';
 function FileTransfer() {
     const [activeTab, setActiveTab] = useState('send'); // Default tab
 
@@ -29,6 +29,7 @@ function FileTransfer() {
             <div className="content">
                 {activeTab === 'send' ? <DragDropandSend /> : <ReceiveFiles />}
             </div>
+            <Footer />
         </div>
     );
 }
