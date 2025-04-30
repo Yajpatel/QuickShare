@@ -18,7 +18,7 @@ function ReceiveFiles() {
         setMessage('');
 
         try {
-            const nameRes = await fetch(`http://localhost:5000/download/filename/${code}`);
+            const nameRes = await fetch(`https://quickshare-096t.onrender.com/download/filename/${code}`);
             console.log(nameRes);
             if (!nameRes.ok) {
                 setMessage("Unable to fetch filename.");
@@ -32,7 +32,7 @@ function ReceiveFiles() {
             
             // console.log(filename);
             // Step 2: Fetch file blob
-            const fileRes = await fetch(`http://localhost:5000/download/${code}`);
+            const fileRes = await fetch(`https://quickshare-096t.onrender.com/download/${code}`);
             if (!fileRes.ok) {
                 setMessage("Unable to download file.");
                 setDownloading(false);
