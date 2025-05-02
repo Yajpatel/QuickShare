@@ -102,7 +102,13 @@ const fs = require('fs');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+app.use(cors(
+    {
+        origin : "https://quick-share-olda.onrender.com",
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['Content-Type', 'Authorization']
+    }
+));
 // app.use(cors({
 //   origin: "http://localhost:5173", // replace with your React frontend URL
 //   methods: ['GET', 'POST'],

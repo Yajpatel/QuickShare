@@ -62,14 +62,15 @@ function DragDropandSend() {
         setLoading(true); // Start spinner
         setErrorMessage('');
         const code = GenerateRandomWords();
-        
 
+        
         const formData = new FormData();
         files.forEach(item => formData.append('files', item.file));
         formData.append('code', code);
 
         try {
             const response = await fetch('https://quickshare-096t.onrender.com/upload', {
+            // const response = await fetch('http://localhost:5000/upload', {
                 method: 'POST',
                 body: formData,
             });
