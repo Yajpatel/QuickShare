@@ -104,7 +104,7 @@ const cors = require('cors');
 const app = express();
 app.use(cors(
     {
-        origin : "https://quick-share-olda.onrender.com",
+        origin : "https://quickshare-096t.onrender.com",
         methods: ['GET', 'POST'],
         allowedHeaders: ['Content-Type', 'Authorization']
     }
