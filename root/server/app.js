@@ -106,8 +106,8 @@ app.use(cors(
     {
         origin : "https://quickshare-096t.onrender.com/upload",
         // origin : "https://quick-share-olda.onrender.com",
-        methods: ['GET', 'POST'],
-        allowedHeaders: ['Content-Type', 'Authorization']
+        // methods: ['GET', 'POST'],
+        // allowedHeaders: ['Content-Type', 'Authorization']
     }
 ));
 // app.use(cors({
