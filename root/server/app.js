@@ -97,47 +97,62 @@
 
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const cors = require('cors');
+const { v2: cloudinary } = require('cloudinary');
+const { Readable } = require('stream');
 
 const app = express();
-app.use(cors(
-    {
-        // origin : "https://quickshare-096t.onrender.com/upload",
-        origin : "https://quick-share-olda.onrender.com",
-        // methods: ['GET', 'POST'],
-        // allowedHeaders: ['Content-Type', 'Authorization']
-    }
-));
-// app.use(cors({
-//   origin: "http://localhost:5173", // replace with your React frontend URL
-//   methods: ['GET', 'POST'],
-//   allowedHeaders: ['Content-Type', 'Authorization']
-// }));
+
+app.use(cors({
+    origin: "https://quick-share-olda.onrender.com",
+}));
 
 const PORT = process.env.PORT || 5000;
 
-// Storage setup
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.originalname);
-    }
+// Cloudinary Configuration
+cloudinary.config({
+    cloud_name: process.env.cloud_name,
+    api_key: process.env.api_key,
+    api_secret: process.env.api_secret
 });
-const upload = multer({ storage: storage });
+
+// Multer setup - store in memory
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 // Middleware
 app.use(express.json());
-app.use(express.static('uploads')); // To serve files statically
 
-// In-memory mapping: code -> filePath
+// In-memory map: code => array of Cloudinary file info
 const codeToFileMap = {};
 
-// API to upload files
-// API to upload files
+// Convert buffer to stream for Cloudinary upload
+const bufferToStream = (buffer) => {
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+    return stream;
+};
+
+// Wrap Cloudinary upload in a promise for async handling
+const uploadToCloudinary = (file) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream({
+            resource_type: 'auto',
+            folder: 'quickshare'
+        }, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(result);
+            }
+        });
+
+        bufferToStream(file.buffer).pipe(stream);
+    });
+};
+
+// Upload route
 app.post('/upload', upload.array('files'), async (req, res) => {
     const { code } = req.body;
 
@@ -145,90 +160,79 @@ app.post('/upload', upload.array('files'), async (req, res) => {
         return res.status(400).json({ error: 'Missing files or code' });
     }
 
-    // Store all files associated with the code
-    req.files.forEach((file) => {
-        // If code doesn't exist, initialize it with an empty array
-        if (!codeToFileMap[code]) {
-            codeToFileMap[code] = [];
-        }
-        // Add the file path to the array for the given code
-        codeToFileMap[code].push(file.path);
+    if (!codeToFileMap[code]) {
+        codeToFileMap[code] = [];
+    }
 
-        // Set auto-delete after 10 minutes (600000 ms)
-            setTimeout(() => {
-                if (codeToFileMap[code]) {
-                    codeToFileMap[code].forEach(filePath => {
-                        if (fs.existsSync(filePath)) {
-                            fs.unlink(filePath, err => {
-                                if (err) console.error(`Failed to delete file: ${filePath}`);
-                                else console.log(`Deleted unused file: ${filePath}`);
-                            });
-                        }
-                    });
-                    delete codeToFileMap[code];
-                    console.log(`Cleaned up code: ${code}`);
-                }
-            }, 5 * 60 * 1000); // 10 minutes
+    try {
+        // Upload all files to Cloudinary in parallel using Promise.all
+        const uploadPromises = req.files.map((file) =>
+            uploadToCloudinary(file).then((result) => {
+                // Add file information to the in-memory map
+                codeToFileMap[code].push({
+                    url: result.secure_url,
+                    public_id: result.public_id,
+                    original_filename: result.original_filename
+                });
+            })
+        );
 
-    });
+        await Promise.all(uploadPromises);
 
-    // Respond with the number of files uploaded
-    res.json({
-        message: 'Files uploaded successfully',
-        code: code,
-        'no of files sent': req.files.length,
-    });
+        // Auto-cleanup after 10 minutes
+        setTimeout(async () => {
+            if (codeToFileMap[code]) {
+                const deletePromises = codeToFileMap[code].map((file) =>
+                    cloudinary.uploader.destroy(file.public_id, { resource_type: 'auto' })
+                        .then(() => {
+                            console.log(`Deleted from Cloudinary: ${file.public_id}`);
+                        })
+                        .catch((err) => {
+                            console.error(`Failed to delete: ${file.public_id}`, err);
+                        })
+                );
+                await Promise.all(deletePromises); // Wait for all deletes to finish
+                delete codeToFileMap[code]; // Clean up in-memory data
+                console.log(`Cleaned up code: ${code}`);
+            }
+        }, 10 * 60 * 1000); // 10 minutes
+
+        res.json({
+            message: 'Files uploaded to Cloudinary',
+            code,
+            'no of files sent': req.files.length
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Upload failed' });
+    }
 });
 
-
-// API to fetch the original filename(s) for a code
+// Get filenames for a code
 app.get('/download/:filename/:code', (req, res) => {
     const code = req.params.code;
-    const filePaths = codeToFileMap[code];
-    console.log(filePaths);
-    if (!filePaths || filePaths.length === 0) {
+    const files = codeToFileMap[code];
+
+    if (!files || files.length === 0) {
         return res.status(404).json({ error: 'Invalid or expired code' });
     }
 
-    const files = filePaths.map(p => path.basename(p));
-    console.log("back",files);
-    console.log("back 1",files[0]);
-    res.json({ filenames: files[0] });
+    res.json({ filenames: files[0].original_filename });
 });
 
-
-// API to download files
+// Get download URL
 app.get('/download/:code', (req, res) => {
     const code = req.params.code;
-    const filePaths = codeToFileMap[code];
+    const files = codeToFileMap[code];
 
-    if (!filePaths || filePaths.length === 0) {
+    if (!files || files.length === 0) {
         return res.status(404).json({ error: 'Invalid or expired code' });
     }
 
-    // Assuming only one file is associated with the code
-    const filePath = filePaths[0]; // Get the first file
-
-    if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ error: 'File not found' });
-    }
-
-    const filename = path.basename(filePath);
-    console.log(filename);
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    // Serve the file for download
-    res.download(filePath,   (err) => {
-        if (err) {
-            console.error('Download error:', err);
-        } else {
-            // After successful download, delete the file and remove it from memory
-            fs.unlinkSync(filePath);
-            delete codeToFileMap[code];
-        }
-    });  
+    res.json({ downloadUrl: files[0].url });
 });
 
-// Start server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

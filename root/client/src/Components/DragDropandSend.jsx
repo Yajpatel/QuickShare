@@ -62,7 +62,6 @@ function DragDropandSend() {
         setLoading(true); // Start spinner
         setErrorMessage('');
         const code = GenerateRandomWords();
-
         
         const formData = new FormData();
         files.forEach(item => formData.append('files', item.file));
@@ -82,6 +81,9 @@ function DragDropandSend() {
             const result = await response.json();
             console.log("Server response:", result);
 
+             // Only set the code after successful upload
+            setCode(code);
+
         } catch (error) {
             console.error("Error sending data to backend:", error);
             if (error.message.includes('Failed to fetch')) {
@@ -93,7 +95,7 @@ function DragDropandSend() {
         }
 
         setLoading(false); // Stop spinner
-        setCode(code);
+        // setCode(code);
     };
 
     const handleDeleteFile = () => {
@@ -143,7 +145,7 @@ function DragDropandSend() {
             )}
 
             <div>
-                <form>
+                <form >
                     <button className="sendbutton" onClick={handleSend}>
                         {loading ? (<><span className="spinner-border spinner-border-sm me-2"></span> <span>Sending</span> </>) : "Send"}
                     </button>
