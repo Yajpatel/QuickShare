@@ -100,6 +100,7 @@ const multer = require('multer');
 const cors = require('cors');
 const { v2: cloudinary } = require('cloudinary');
 const { Readable } = require('stream');
+const axios = require('axios');
 
 const app = express();
 
@@ -222,7 +223,8 @@ app.get('/download/:filename/:code', (req, res) => {
 });
 
 // Get download URL
-app.get('/download/:code', (req, res) => {
+
+app.get('/download/:code', async (req, res) => {
     const code = req.params.code;
     const files = codeToFileMap[code];
 
@@ -230,7 +232,20 @@ app.get('/download/:code', (req, res) => {
         return res.status(404).json({ error: 'Invalid or expired code' });
     }
 
-    res.json({ downloadUrl: files[0].url });
+    const fileUrl = files[0].url;
+    const filename = files[0].original_filename;
+
+    try {
+        const response = await axios.get(fileUrl, { responseType: 'stream' });
+
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Type', response.headers['content-type']);
+
+        response.data.pipe(res);
+    } catch (error) {
+        console.error("Error downloading file from Cloudinary:", error.message);
+        res.status(500).json({ error: 'Failed to download file' });
+    }
 });
 
 app.listen(PORT, () => {
