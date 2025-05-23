@@ -51,10 +51,8 @@ function ReceiveFiles() {
             console.error("Error during download:", error);
             setMessage("An error occurred while downloading.");
         }
-
         setDownloading(false);
     };
-
     
     return (
         <div className="container">
