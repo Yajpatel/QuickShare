@@ -134,6 +134,7 @@ const bufferToStream = (buffer) => {
     stream.push(null);
     return stream;
 };
+
 // Wrap Cloudinary upload in a promise for async handling
 const uploadToCloudinary = (file) => {
     return new Promise((resolve, reject) => {
@@ -222,20 +223,27 @@ app.get('/download/:filename/:code', (req, res) => {
 });
 
 // Get download URL
-app.get('/download/:code', async (req,res) => {
-  try {
+
+app.get('/download/:code', async (req, res) => {
     const code = req.params.code;
-    const info = codeToFileMap[code];
-    if (!info) {
-      return res.status(404).send({ error: 'Code not found' });
+    const files = codeToFileMap[code];
+
+    if (!files || files.length === 0) {
+        return res.status(404).json({ error: 'Invalid or expired code' });
     }
-    const fileUrl = info.secure_url;
-    const axiosRes = await axios.get(fileUrl, { responseType: 'stream' });
-    axiosRes.data.pipe(res);
-  } catch(err) {
-    console.error("Download error:", err);
-    res.status(500).send({ error: 'Internal Server Error' });
-  }
+
+    const fileUrl = files[0].url;
+    const filename = files[0].original_filename;
+
+    try {
+        const response = await axios.get(fileUrl, { responseType: 'stream' });
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Type', response.headers['content-type']);
+        response.data.pipe(res);
+    } catch (error) {
+        console.error("Error downloading file from Cloudinary:", error.message);
+        res.status(500).json({ error: 'Failed to download file' });
+    }
 });
 
 app.listen(PORT, () => {
