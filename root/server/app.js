@@ -139,7 +139,7 @@ const bufferToStream = (buffer) => {
 const uploadToCloudinary = (file) => {
     return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream({
-            resource_type: 'auto',
+            resource_type: 'raw',
             folder: 'quickshare'
         }, (error, result) => {
             if (error) {
