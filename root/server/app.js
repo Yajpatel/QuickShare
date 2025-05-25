@@ -227,11 +227,9 @@ app.get('/download/:filename/:code', (req, res) => {
 });
 
 // Get download URL
-
-app.get('/download/:code', async (req, res) => {
-    console.log("request hit");
+app.get('/download/:code', (req, res) => {
     const code = req.params.code;
-     console.log(`Download request for code: ${code}`);
+    console.log(`Download request for code: ${code}`);
 
     const files = codeToFileMap[code];
 
@@ -240,20 +238,12 @@ app.get('/download/:code', async (req, res) => {
     }
 
     const fileUrl = files[0].url;
-    const filename = files[0].original_filename;
+    console.log('Redirecting to:', fileUrl);
 
-    console.log('Found file:', filename, fileUrl);
-
-    try {
-        const response = await axios.get(fileUrl, { responseType: 'stream' });
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Type', response.headers['content-type']);
-        response.data.pipe(res);
-    } catch (error) {
-        console.error("Error downloading file from Cloudinary:", error.message);
-        res.status(500).json({ error: 'Failed to download file' });
-    }
+    // Redirect user to Cloudinary file URL
+    res.redirect(fileUrl);
 });
+
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
