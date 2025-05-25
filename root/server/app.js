@@ -101,6 +101,7 @@ const cors = require('cors');
 const { v2: cloudinary } = require('cloudinary');
 const { Readable } = require('stream');
 const axios = require('axios');
+const https = require('https');
 
 const app = express();
 
@@ -226,13 +227,10 @@ app.get('/download/:filename/:code', (req, res) => {
     res.json({ filenames: files[0].original_filename });
 });
 
+
 // Get download URL
-
 app.get('/download/:code', async (req, res) => {
-    console.log("request hit");
     const code = req.params.code;
-     console.log(`Download request for code: ${code}`);
-
     const files = codeToFileMap[code];
 
     if (!files || files.length === 0) {
@@ -242,17 +240,14 @@ app.get('/download/:code', async (req, res) => {
     const fileUrl = files[0].url;
     const filename = files[0].original_filename;
 
-    console.log('Found file:', filename, fileUrl);
-
-    try {
-        const response = await axios.get(fileUrl, { responseType: 'stream' });
+    https.get(fileUrl, (fileRes) => {
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Type', response.headers['content-type']);
-        response.data.pipe(res);
-    } catch (error) {
-        console.error("Error downloading file from Cloudinary:", error.message);
-        res.status(500).json({ error: 'Failed to download file' });
-    }
+        res.setHeader('Content-Type', fileRes.headers['content-type']);
+        fileRes.pipe(res);
+    }).on('error', (err) => {
+        console.error('Error fetching file from Cloudinary:', err);
+        res.status(500).json({ error: 'Failed to fetch file' });
+    });
 });
 
 app.listen(PORT, () => {
