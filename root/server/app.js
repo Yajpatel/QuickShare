@@ -226,6 +226,8 @@ app.get('/download/:filename/:code', (req, res) => {
 
 app.get('/download/:code', async (req, res) => {
     const code = req.params.code;
+     console.log(`Download request for code: ${code}`);
+
     const files = codeToFileMap[code];
 
     if (!files || files.length === 0) {
@@ -234,6 +236,8 @@ app.get('/download/:code', async (req, res) => {
 
     const fileUrl = files[0].url;
     const filename = files[0].original_filename;
+
+    console.log('Found file:', filename, fileUrl);
 
     try {
         const response = await axios.get(fileUrl, { responseType: 'stream' });
