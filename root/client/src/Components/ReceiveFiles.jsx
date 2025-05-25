@@ -18,7 +18,7 @@
             setMessage('');
 
             try {
-                const response = await fetch(`https://quickshare-096t.onrender.com/download/${code}`);
+                const response = await fetch(`https://quickshare-q3sj.onrender.com/download/${code}`);
 
                 if (!response.ok) {
                     setMessage("Download failed. Invalid or expired code.");
