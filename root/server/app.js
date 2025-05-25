@@ -154,7 +154,7 @@ const uploadToCloudinary = (file) => {
 };
 
 // Upload route
-app.post('/upload', upload.single('files'), async (req, res) => {
+app.post('/upload', upload.array('files'), async (req, res) => {
     const { code } = req.body;
 
     if (!req.files || !code) {
