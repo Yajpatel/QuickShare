@@ -225,6 +225,7 @@ app.get('/download/:filename/:code', (req, res) => {
 // Get download URL
 
 app.get('/download/:code', async (req, res) => {
+    console.log("request hit");
     const code = req.params.code;
      console.log(`Download request for code: ${code}`);
 
