@@ -152,6 +152,10 @@ const uploadToCloudinary = (file) => {
         bufferToStream(file.buffer).pipe(stream);
     });
 };
+app.get('/test', (req, res) => {
+  console.log('Test route hit');
+  res.send('Server is working');
+});
 
 // Upload route
 app.post('/upload', upload.array('files'), async (req, res) => {
