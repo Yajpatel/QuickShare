@@ -95,14 +95,168 @@
 //   console.log(`Server running on http://localhost:${PORT}`);
 // });
 
+// const express = require('express');
+// const multer = require('multer');
+// const cors = require('cors');
+// const { v2: cloudinary } = require('cloudinary');
+// const { Readable } = require('stream');
+// const axios = require('axios');
+// const https = require('https');
+
+// const app = express();
+
+// app.use(cors({
+//     origin: "https://quick-share-olda.onrender.com",
+// }));
+
+// const PORT = process.env.PORT || 5000;
+
+// // Cloudinary Configuration
+// cloudinary.config({
+//     cloud_name: process.env.cloud_name,
+//     api_key: process.env.api_key,
+//     api_secret: process.env.api_secret
+// });
+
+// // Multer setup - store in memory
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage });
+
+// // Middleware
+// app.use(express.json());
+
+// // In-memory map: code => array of Cloudinary file info
+// const codeToFileMap = {};
+
+// // Convert buffer to stream for Cloudinary upload
+// const bufferToStream = (buffer) => {
+//     const stream = new Readable();
+//     stream.push(buffer);
+//     stream.push(null);
+//     return stream;
+// };
+
+// // Wrap Cloudinary upload in a promise for async handling
+// const uploadToCloudinary = (file) => {
+//     return new Promise((resolve, reject) => {
+//         const stream = cloudinary.uploader.upload_stream({
+//             resource_type: 'raw',
+//             folder: 'quickshare'
+//         }, (error, result) => {
+//             if (error) {
+//                 reject(error);
+//             } else {
+//                 resolve(result);
+//             }
+//         });
+
+//         bufferToStream(file.buffer).pipe(stream);
+//     });
+// };
+// app.get('/test', (req, res) => {
+//   console.log('Test route hit');
+//   res.send('Server is working');
+// });
+
+// // Upload route
+// app.post('/upload', upload.array('files'), async (req, res) => {
+//     const { code } = req.body;
+
+//     if (!req.files || !code) {
+//         return res.status(400).json({ error: 'Missing files or code' });
+//     }
+
+//     if (!codeToFileMap[code]) {
+//         codeToFileMap[code] = [];
+//     }
+
+//     try {
+//         // Upload all files to Cloudinary in parallel using Promise.all
+//         const uploadPromises = req.files.map((file) =>
+//             uploadToCloudinary(file).then((result) => {
+//                 // Add file information to the in-memory map
+//                 codeToFileMap[code].push({
+//                     url: result.secure_url,
+//                     public_id: result.public_id,
+//                     original_filename: result.original_filename
+//                 });
+//             })
+//         );
+
+//         await Promise.all(uploadPromises);
+
+//         // Auto-cleanup after 10 minutes
+//         setTimeout(async () => {
+//             if (codeToFileMap[code]) {
+//                 const deletePromises = codeToFileMap[code].map((file) =>
+//                     cloudinary.uploader.destroy(file.public_id, { resource_type: 'auto' })
+//                         .then(() => {
+//                             console.log(`Deleted from Cloudinary: ${file.public_id}`);
+//                         })
+//                         .catch((err) => {
+//                             console.error(`Failed to delete: ${file.public_id}`, err);
+//                         })
+//                 );
+//                 await Promise.all(deletePromises); // Wait for all deletes to finish
+//                 delete codeToFileMap[code]; // Clean up in-memory data
+//                 console.log(`Cleaned up code: ${code}`);
+//             }
+//         }, 10 * 60 * 1000); // 10 minutes
+
+//         res.json({
+//             message: 'Files uploaded to Cloudinary',
+//             code,
+//             'no of files sent': req.files.length
+//         });
+
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ error: 'Upload failed' });
+//     }
+// });
+
+// // Get filenames for a code
+// app.get('/download/:filename/:code', (req, res) => {
+//     const code = req.params.code;
+//     const files = codeToFileMap[code];
+
+//     if (!files || files.length === 0) {
+//         return res.status(404).json({ error: 'Invalid or expired code' });
+//     }
+
+//     res.json({ filenames: files[0].original_filename });
+// });
+
+
+// // Get download URL
+// app.get('/download/:code', async (req, res) => {
+//     const code = req.params.code;
+//     const files = codeToFileMap[code];
+
+//     if (!files || files.length === 0) {
+//         return res.status(404).json({ error: 'Invalid or expired code' });
+//     }
+
+//     const fileUrl = files[0].url;
+//     const filename = files[0].original_filename;
+
+//     https.get(fileUrl, (fileRes) => {
+//         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+//         res.setHeader('Content-Type', fileRes.headers['content-type']);
+//         fileRes.pipe(res);
+//     }).on('error', (err) => {
+//         console.error('Error fetching file from Cloudinary:', err);
+//         res.status(500).json({ error: 'Failed to fetch file' });
+//     });
+// });
+
+// app.listen(PORT, () => {
+//     console.log(`Server running on http://localhost:${PORT}`);
+// });
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
-const { v2: cloudinary } = require('cloudinary');
-const { Readable } = require('stream');
 const axios = require('axios');
-const https = require('https');
-
 const app = express();
 
 app.use(cors({
@@ -111,57 +265,22 @@ app.use(cors({
 
 const PORT = process.env.PORT || 5000;
 
-// Cloudinary Configuration
-cloudinary.config({
-    cloud_name: process.env.cloud_name,
-    api_key: process.env.api_key,
-    api_secret: process.env.api_secret
-});
-
-// Multer setup - store in memory
+// Multer memory storage
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Middleware
 app.use(express.json());
 
-// In-memory map: code => array of Cloudinary file info
+// In-memory store: code => file metadata
 const codeToFileMap = {};
 
-// Convert buffer to stream for Cloudinary upload
-const bufferToStream = (buffer) => {
-    const stream = new Readable();
-    stream.push(buffer);
-    stream.push(null);
-    return stream;
-};
-
-// Wrap Cloudinary upload in a promise for async handling
-const uploadToCloudinary = (file) => {
-    return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream({
-            resource_type: 'raw',
-            folder: 'quickshare'
-        }, (error, result) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(result);
-            }
-        });
-
-        bufferToStream(file.buffer).pipe(stream);
-    });
-};
 app.get('/test', (req, res) => {
-  console.log('Test route hit');
-  res.send('Server is working');
+    res.send('Server is working');
 });
 
-// Upload route
+// Upload endpoint using transfer.sh
 app.post('/upload', upload.array('files'), async (req, res) => {
     const { code } = req.body;
-
     if (!req.files || !code) {
         return res.status(400).json({ error: 'Missing files or code' });
     }
@@ -171,85 +290,80 @@ app.post('/upload', upload.array('files'), async (req, res) => {
     }
 
     try {
-        // Upload all files to Cloudinary in parallel using Promise.all
-        const uploadPromises = req.files.map((file) =>
-            uploadToCloudinary(file).then((result) => {
-                // Add file information to the in-memory map
-                codeToFileMap[code].push({
-                    url: result.secure_url,
-                    public_id: result.public_id,
-                    original_filename: result.original_filename
-                });
-            })
-        );
+        const uploadPromises = req.files.map(async (file) => {
+            const fileName = file.originalname;
+            const response = await axios.put(
+                `https://transfer.sh/${fileName}`, // ✅ FIXED: template string
+                file.buffer,
+                {
+                    headers: {
+                        'Content-Type': 'application/octet-stream',
+                        'Content-Length': file.buffer.length
+                    }
+                }
+            );
+
+            codeToFileMap[code].push({
+                name: fileName,
+                url: response.data.trim()
+            });
+        });
 
         await Promise.all(uploadPromises);
 
-        // Auto-cleanup after 10 minutes
-        setTimeout(async () => {
-            if (codeToFileMap[code]) {
-                const deletePromises = codeToFileMap[code].map((file) =>
-                    cloudinary.uploader.destroy(file.public_id, { resource_type: 'auto' })
-                        .then(() => {
-                            console.log(`Deleted from Cloudinary: ${file.public_id}`);
-                        })
-                        .catch((err) => {
-                            console.error(`Failed to delete: ${file.public_id}`, err);
-                        })
-                );
-                await Promise.all(deletePromises); // Wait for all deletes to finish
-                delete codeToFileMap[code]; // Clean up in-memory data
-                console.log(`Cleaned up code: ${code}`);
-            }
-        }, 10 * 60 * 1000); // 10 minutes
+        // Auto-clean after 10 minutes
+        setTimeout(() => {
+            delete codeToFileMap[code];
+            console.log(`Cleaned up code: ${code}`); // ✅ FIXED: backticks
+        }, 10 * 60 * 1000);
 
         res.json({
-            message: 'Files uploaded to Cloudinary',
+            message: 'Files uploaded to transfer.sh',
             code,
             'no of files sent': req.files.length
         });
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Upload failed' });
+        res.status(500).json({ error: 'Upload to transfer.sh failed' });
     }
 });
 
-// Get filenames for a code
+// Endpoint to get filenames only
 app.get('/download/:filename/:code', (req, res) => {
-    const code = req.params.code;
+    const { code } = req.params;
     const files = codeToFileMap[code];
 
     if (!files || files.length === 0) {
         return res.status(404).json({ error: 'Invalid or expired code' });
     }
 
-    res.json({ filenames: files[0].original_filename });
+    res.json({ filenames: files.map(f => f.name) });
 });
 
-
-// Get download URL
+// Endpoint to download a file by code
 app.get('/download/:code', async (req, res) => {
-    const code = req.params.code;
+    const { code } = req.params;
     const files = codeToFileMap[code];
 
     if (!files || files.length === 0) {
         return res.status(404).json({ error: 'Invalid or expired code' });
     }
 
-    const fileUrl = files[0].url;
-    const filename = files[0].original_filename;
+    const file = files[0]; // You can allow downloading all files if needed
 
-    https.get(fileUrl, (fileRes) => {
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Type', fileRes.headers['content-type']);
-        fileRes.pipe(res);
-    }).on('error', (err) => {
-        console.error('Error fetching file from Cloudinary:', err);
-        res.status(500).json({ error: 'Failed to fetch file' });
-    });
+    try {
+        const response = await axios.get(file.url, { responseType: 'stream' });
+
+        res.setHeader('Content-Disposition', `attachment; filename="${file.name}"`); // ✅ FIXED: quotes
+        res.setHeader('Content-Type', response.headers['content-type']);
+        response.data.pipe(res);
+    } catch (err) {
+        console.error('Download error:', err);
+        res.status(500).json({ error: 'Failed to fetch file from transfer.sh' });
+    }
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`); // ✅ FIXED: backticks
 });
