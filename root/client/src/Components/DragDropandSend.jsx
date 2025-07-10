@@ -68,8 +68,8 @@ function DragDropandSend() {
         formData.append('code', code);
 
         try {
-            // const response = await fetch('https://quickshare-q3sj.onrender.com/upload', {
-            const response = await fetch('http://localhost:5000/upload', {
+            const response = await fetch('https://quickshare-q3sj.onrender.com/upload', {
+            // const response = await fetch('http://localhost:5000/upload', {
                 method: 'POST',
                 body: formData,
             });

@@ -82,3 +82,51 @@ p {
     font-weight: 700;
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+.file-info-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.file-info-box {
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 15px;
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.file-info-box h4 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.file-info-box p {
+    margin: 8px 0;
+    color: #555;
+}
+
+.download-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+.download-button:hover {
+    background-color: #45a049;
+}
+
+.download-button:active {
+    background-color: #3e8e41;
+}

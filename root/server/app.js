@@ -4,7 +4,9 @@ const cors = require('cors');
 const { v2: cloudinary } = require('cloudinary');
 const streamifier = require('streamifier');
 const dotenv = require('dotenv');
-
+const mongoose = require('mongoose');
+const File = require('./models/File');
+const axios = require('axios');
 // Load environment variables
 dotenv.config();
 
@@ -16,6 +18,11 @@ app.use(cors({
 }));
 
 const PORT = process.env.PORT || 5000;
+
+// MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
 // Cloudinary Configuration
 cloudinary.config({
@@ -31,9 +38,6 @@ const upload = multer({ storage });
 // Middleware
 app.use(express.json());
 
-// In-memory store: code => file metadata
-const codeToFileMap = {};
-
 // Health check endpoint
 app.get('/test', (req, res) => {
     res.send('Server is working');
@@ -44,7 +48,8 @@ const uploadToCloudinary = (buffer, fileName) => {
     return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
             {
-                resource_type: 'auto',
+                resource_type : 'raw',
+                type : 'upload',
                 folder: 'quickshare',
                 public_id: `${Date.now()}-${fileName}`,
                 use_filename: true
@@ -62,23 +67,22 @@ const uploadToCloudinary = (buffer, fileName) => {
     });
 };
 
-// Upload endpoint using Cloudinary
+// Upload endpoint using Cloudinary and MongoDB
 app.post('/upload', upload.array('files'), async (req, res) => {
     const { code } = req.body;
     
+    console.log('Uploading files with code:', code); // Debug log
     if (!req.files || !code) {
         return res.status(400).json({ error: 'Missing files or code' });
-    }
-
-    if (!codeToFileMap[code]) {
-        codeToFileMap[code] = [];
     }
 
     try {
         const uploadPromises = req.files.map(async (file) => {
             const result = await uploadToCloudinary(file.buffer, file.originalname);
             
-            codeToFileMap[code].push({
+            // Save file information to MongoDB
+            await File.create({
+                code,
                 name: file.originalname,
                 url: result.secure_url,
                 public_id: result.public_id,
@@ -88,21 +92,6 @@ app.post('/upload', upload.array('files'), async (req, res) => {
 
         await Promise.all(uploadPromises);
 
-        // Auto-clean after 10 minutes
-        setTimeout(async () => {
-            if (codeToFileMap[code]) {
-                // Delete files from Cloudinary
-                const deletePromises = codeToFileMap[code].map(file => 
-                    cloudinary.uploader.destroy(file.public_id, { resource_type: file.resource_type })
-                        .catch(err => console.error(`Failed to delete ${file.public_id}:`, err))
-                );
-                
-                await Promise.all(deletePromises);
-                delete codeToFileMap[code];
-                console.log(`Cleaned up code: ${code}`);
-            }
-        }, 10 * 60 * 1000); // 10 minutes
-
         res.json({
             message: 'Files uploaded successfully',
             code,
@@ -111,39 +100,63 @@ app.post('/upload', upload.array('files'), async (req, res) => {
 
     } catch (err) {
         console.error('Upload error:', err);
-        res.status(500).json({ error: 'Upload to Cloudinary failed' });
+        res.status(500).json({ error: 'Upload to Cloudinary or MongoDB failed' });
     }
 });
 
-// Endpoint to get filenames only
-app.get('/download/:filename/:code', (req, res) => {
-    const { code } = req.params;
-    const files = codeToFileMap[code];
-
-    if (!files || files.length === 0) {
-        return res.status(404).json({ error: 'Invalid or expired code' });
-    }
-
-    res.json({ filenames: files.map(f => f.name) });
-});
-
-// Endpoint to download a file by code
-app.get('/download/:code', async (req, res) => {
-    const { code } = req.params;
-    const files = codeToFileMap[code];
-
-    if (!files || files.length === 0) {
-        return res.status(404).json({ error: 'Invalid or expired code' });
-    }
-
+// Endpoint to get filenames only (now downloads the specific file)
+app.get('/download/:filename/:code', async (req, res) => {
+    const { code, filename } = req.params;
+    console.log('Downloading file with code:', code, 'and filename:', filename); // Debug log
     try {
-        const file = files[0]; // Get the first file (we're only handling one file at a time)
-        
-        // Redirect to the Cloudinary URL for direct download
-        res.redirect(file.url);
+        const file = await File.findOne({ code, name: filename });
+        if (!file) {
+            return res.status(404).json({ error: 'Invalid or expired code or file not found' });
+        }
+        // Fetch the file from Cloudinary and pipe it to the response
+        const fileResponse = await axios.get(file.url, { responseType: 'stream' });
+        res.setHeader('Content-Disposition', `attachment; filename="${file.name}"`);
+        res.setHeader('Content-Type', fileResponse.headers['content-type'] || 'application/octet-stream');
+        fileResponse.data.pipe(res);
     } catch (err) {
         console.error('Download error:', err);
         res.status(500).json({ error: 'Failed to download file' });
+    }
+});
+
+// Endpoint to download a file by code (proxy from Cloudinary)
+app.get('/download/:code', async (req, res) => {
+    const { code } = req.params;
+    try {
+        const files = await File.find({ code });
+        if (!files || files.length === 0) {
+            return res.status(404).json({ error: 'Invalid or expired code' });
+        }
+        const file = files[0];
+        const fileUrl = file.url;
+        const fileName = file.name;
+        // Fetch the file from Cloudinary and pipe it to the response
+        const fileResponse = await axios.get(fileUrl, { responseType: 'stream' });
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.setHeader('Content-Type', fileResponse.headers['content-type'] || 'application/octet-stream');
+        fileResponse.data.pipe(res);
+    } catch (err) {
+        console.error('Download error:', err);
+        res.status(500).json({ error: 'Failed to download file' });
+    }
+});
+
+// Endpoint to get all files (name and url) for a code
+app.get('/files/:code', async (req, res) => {
+    const { code } = req.params;
+    try {
+        const files = await File.find({ code });
+        if (!files || files.length === 0) {
+            return res.status(404).json({ error: 'Invalid or expired code' });
+        }
+        res.json({ files: files.map(f => ({ name: f.name, url: f.url })) });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to retrieve files' });
     }
 });
 
