@@ -23,12 +23,14 @@ function ReceiveFiles() {
         try {
             // Use axios to check if files exist for the code
             // https://quickshare-q3sj.onrender.com/upload
-            const response = await axios.get(`https://quickshare-q3sj.onrender.com/files/${code}`);
+            // const response = await axios.get(`https://quickshare-q3sj.onrender.com/files/${code}`);
+            const response = await axios.get(`http://localhost:5000/files/${code}`);
             if (response.data.files && response.data.files.length > 0) {
                 setMessage(`Downloading ${response.data.files.length} file(s)...`);
                 // Trigger download from backend (first file)
                 const link = document.createElement('a');
-                link.href = `https://quickshare-q3sj.onrender.com/download/${code}`;
+                // link.href = `https://quickshare-q3sj.onrender.com/download/${code}`;
+                link.href = `http://localhost:5000/download/${code}`;
                 link.setAttribute('download', '');
                 document.body.appendChild(link);
                 link.click();
@@ -60,7 +62,8 @@ function ReceiveFiles() {
     return (
         <div className="container">
             <h3 style={{ color: "black" }} className="label">
-                <i className="fa-regular fa-circle-down bouncing-icon"></i> Receive File
+                <div><i className="fa-regular fa-circle-down bouncing-icon"></i> </div>
+                <span>Receive File</span>
             </h3>
             <form onSubmit={handleSubmit}>
                 <div className="for-center">

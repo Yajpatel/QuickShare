@@ -114,6 +114,7 @@
   
   .upload-icon i {
     animation: bounce 1s infinite;
+    font-size: 2.5rem;
   }
 /* //////////////   */
 
@@ -140,7 +141,7 @@
 
 @media screen and (max-width: 768px) {
     .drop-zone {
-        width: 80% !important;
+        width: 70% !important;
         padding: 30px !important;
     }
 
@@ -169,14 +170,17 @@
     }
     .upload-icon i {
         margin-bottom: 4px;
-        font-size: 40px;
+        font-size: 1.8rem;
+    }
+    .container{
+        width: 80%;
     }
     
 }
 
 @media screen and (max-width: 480px) {
     .drop-zone {
-        width: 95% !important;
+        width: 60% !important;
         padding: 20px !important;
     }
 
@@ -190,7 +194,10 @@
     }
     .upload-icon i {
         margin-bottom: 2px;
-        font-size: 30px;
+        font-size: 1.6rem;
+    }
+    .container{
+        width: 100%;
     }
 }
 

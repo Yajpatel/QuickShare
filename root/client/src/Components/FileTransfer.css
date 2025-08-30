@@ -13,9 +13,14 @@
     align-items: center;
     padding: 15px 30px;
     /* background-color: #4b6cb7; */
-    background-image: linear-gradient(to right, #182848, #4b6cb7);
+    /* background-image: linear-gradient(to right, #182848, #4b6cb7); */
+    /* background-color: #4d66a1; */
+    background-image: linear-gradient(to right, #273f6d, #4b6cb7);
     color: white;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-family: "Roboto", sans-serif;
+    font-optical-sizing: auto;
+    font-style:normal;
 }
 
 /* Navbar brand/logo */
@@ -73,7 +78,6 @@
     align-items: center !important;
 }
 
-
 @media (max-width: 600px) {
     .navbar {
         flex-direction: column;
@@ -90,4 +94,5 @@
         margin: 15px;
         padding: 15px;
     }
+    
 }

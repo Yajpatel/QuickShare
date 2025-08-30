@@ -53,6 +53,7 @@ p {
 
 .bouncing-icon {
     animation: bounce 1s infinite;
+    font-size: 1.5rem;
 }
 
 /* //////////////////////////////// */
@@ -63,6 +64,13 @@ p {
     }
 
     
+
+}
+
+@media (max-width: 768px) {
+    .input-box{
+            width: 160px;
+        }
 
 }
 
