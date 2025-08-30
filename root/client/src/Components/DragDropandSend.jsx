@@ -136,7 +136,7 @@ function DragDropandSend() {
                                     onClick={handleDeleteFile}
                                     className="delete-button"
                                 >
-                                    ❌
+                                    remove
                                 </button>
                             </div>
                         </div>
