@@ -28,8 +28,8 @@ function DragDropandSend() {
             return;
         }
          const file = newFiles[0];
-    if (file.size > 500 * 1024 * 1024) { // 400 MB in bytes
-        setErrorMessage('File size cannot exceed 500 MB.');
+    if (file.size > 250 * 1024 * 1024) { // 400 MB in bytes
+        setErrorMessage('File size cannot exceed 250 MB.');
         return;
     }
         setFiles(newFiles.map((file) => ({
