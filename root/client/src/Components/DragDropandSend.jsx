@@ -147,7 +147,7 @@ function DragDropandSend() {
             <div>
                 <form >
                     <button className="sendbutton" onClick={handleSend}>
-                        {loading ? (<><span className="spinner-border spinner-border-sm me-2"></span> <span>Sending</span> </>) : "Send"}
+                        {loading ? (<><span className="spinner-border spinner-border-sm me-2"></span> <span>Sending...</span> <div>do not exit this page</div> </>) : "Send"}
                     </button>
                 </form>
             </div>
