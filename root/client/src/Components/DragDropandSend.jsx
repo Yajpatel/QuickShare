@@ -27,6 +27,11 @@ function DragDropandSend() {
             setErrorMessage('You can only upload one file at a time.');
             return;
         }
+         const file = newFiles[0];
+    if (file.size > 500 * 1024 * 1024) { // 400 MB in bytes
+        setErrorMessage('File size cannot exceed 500 MB.');
+        return;
+    }
         setFiles(newFiles.map((file) => ({
             file,
             name: file.name,
