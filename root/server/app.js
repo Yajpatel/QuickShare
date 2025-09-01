@@ -19,8 +19,8 @@ const app = express();
 
 // Enable CORS for the client domain
 app.use(cors({
-    // origin: "https://quick-share-olda.onrender.com",
-    origin: "http://localhost:5173",
+    origin: "https://quick-share-olda.onrender.com",
+    // origin: "http://localhost:5173",
 }));
 
 const PORT = process.env.PORT || 5000;
@@ -42,7 +42,9 @@ cloudinary.config({
 // +++ ADDED: New Firebase Admin SDK Configuration +++
 // Make sure the 'serviceAccountKey.json' is in your server directory
 // const serviceAccount = require('/etc/secrets/serviceAccountKey.json');
-const serviceAccount = require('./serviceAccountKey.json');
+// const serviceAccount = require('./serviceAccountKey.json');
+
+const serviceAccount = require('./etc/secrets/serviceAccountKey.json');
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET // Add your bucket name to the .env file
