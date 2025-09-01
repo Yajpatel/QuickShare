@@ -18,12 +18,12 @@ const app = express();
 
 // Enable CORS for the client domain
 app.use(cors({
-    origin: "https://quick-share-olda.onrender.com",
-    // origin: "http://localhost:5173",
+    // origin: "https://quick-share-olda.onrender.com",
+    origin: "http://localhost:5173",
 }));
 
-const PORT = process.env.PORT || 5000;
-
+const PORT = process.env.PORT;
+console.log("hii",process.env.PORT)
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('Connected to MongoDB'))
@@ -40,7 +40,8 @@ cloudinary.config({
 
 // +++ ADDED: New Firebase Admin SDK Configuration +++
 // Make sure the 'serviceAccountKey.json' is in your server directory
-const serviceAccount = require('./serviceAccountKey.json');
+// const serviceAccount = require('/etc/secrets/serviceAccountKey.json');
+const serviceAccount  =require('./serviceAccountKey.json');
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET // Add your bucket name to the .env file
@@ -215,6 +216,8 @@ app.get('/download/:code', async (req, res) => {
             version: 'v4',
             action: 'read',
             expires: Date.now() + 10 * 60 * 1000, // 10 minutes from now
+
+            responseDisposition: `attachment; filename="${file.name}"`,
         };
 
         const [url] = await bucket.file(file.firebaseStoragePath).getSignedUrl(options);
@@ -243,6 +246,8 @@ app.get('/files/:code', async (req, res) => {
             version: 'v4',
             action: 'read',
             expires: Date.now() + 10 * 60 * 1000, // 10 minutes
+
+            
         };
 
         const [url] = await bucket.file(files[0].firebaseStoragePath).getSignedUrl(options);
