@@ -56,7 +56,7 @@ const bucket = admin.storage().bucket();
 // Multer memory storage for temporary file handling
 const storage = multer.memoryStorage();
 const upload = multer({ storage,
-                      limits: { fileSize: 500 * 1024 * 1024 }
+                      limits: { fileSize: 250 * 1024 * 1024 }
                       });
 
 // Middleware
@@ -155,7 +155,7 @@ app.post('/upload', upload.array('files'), async (req, res) => {
         console.error('Upload error:', err);
         console.error('Upload error:', err);
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ error: 'File size exceeds the 500 MB limit.' });
+        return res.status(400).json({ error: 'File size exceeds the 250 MB limit.' });
     }
         // res.status(500).json({ error: 'Upload to Cloudinary or MongoDB failed' }); // <-- OLD
         res.status(500).json({ error: 'Upload to Firebase or MongoDB failed' }); // <-- NEW
