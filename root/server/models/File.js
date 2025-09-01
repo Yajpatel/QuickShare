@@ -10,15 +10,8 @@ const fileSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    url: {
-        type: String,
-        required: true
-    },
-    public_id: {
-        type: String,
-        required: true
-    },
-    resource_type: {
+    // The path to the file in Firebase Storage
+    firebaseStoragePath: {
         type: String,
         required: true
     },
@@ -29,4 +22,4 @@ const fileSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('File', fileSchema); 
+module.exports = mongoose.model('File', fileSchema);
