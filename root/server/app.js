@@ -44,7 +44,7 @@ cloudinary.config({
 // const serviceAccount = require('/etc/secrets/serviceAccountKey.json');
 // const serviceAccount = require('./serviceAccountKey.json');
 
-const serviceAccount = require('./etc/secrets/serviceAccountKey.json');
+const serviceAccount = require('/etc/secrets/serviceAccountKey.json');
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET // Add your bucket name to the .env file
